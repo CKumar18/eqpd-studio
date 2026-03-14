@@ -21,6 +21,7 @@ export default function ContactForm() {
   const [form, setForm] = useState({
     name: "",
     email: "",
+    company: "",
     projectType: "",
     message: "",
   });
@@ -48,7 +49,7 @@ export default function ContactForm() {
 
       if (response.ok) {
         setSubmitted(true);
-        setForm({ name: "", email: "", projectType: "", message: "" });
+        setForm({ name: "", email: "", company: "", projectType: "", message: "" });
       } else {
         const data = await response.json();
         throw new Error(data.error || "Failed to submit form");
@@ -85,7 +86,7 @@ export default function ContactForm() {
         <Button
           onClick={() => {
             setSubmitted(false);
-            setForm({ name: "", email: "", projectType: "", message: "" });
+            setForm({ name: "", email: "", company: "", projectType: "", message: "" });
           }}
           variant="outline"
           className="mt-2"
@@ -117,6 +118,23 @@ export default function ContactForm() {
             required
             placeholder="John Doe"
             value={form.name}
+            onChange={handleChange}
+            className={inputClass}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <label
+            htmlFor="company"
+            className="text-sm font-medium text-zinc-900 dark:text-zinc-50"
+          >
+            Company <span className="text-zinc-400 font-normal">(optional)</span>
+          </label>
+          <input
+            id="company"
+            name="company"
+            type="text"
+            placeholder="Acme Inc."
+            value={form.company}
             onChange={handleChange}
             className={inputClass}
           />
