@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { supabase } from '@/lib/supabase';
+import { getAdminReplyEmail } from '@/lib/email-templates';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -21,29 +22,15 @@ export async function POST(
 
   // 1. Send email via Resend
   const { error: emailError } = await resend.emails.send({
-    from: 'EQPD Studio <onboarding@resend.dev>',
+    from: 'EQPD Admin <onboarding@resend.dev>',
     to: [toEmail],
     subject,
-    html: `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #09090b;">
-        <div style="background: linear-gradient(135deg, #7c3aed, #4f46e5); padding: 24px; border-radius: 12px 12px 0 0;">
-          <h2 style="color: white; margin: 0; font-size: 20px;">EQPD Studio</h2>
-        </div>
-        <div style="background: #f9f9f9; padding: 32px; border-radius: 0 0 12px 12px; border: 1px solid #e4e4e7; border-top: none;">
-          <p>Hello ${toName || 'there'},</p>
-          <div style="white-space: pre-wrap; line-height: 1.7;">${body}</div>
-          <hr style="border: 1px solid #e4e4e7; margin: 24px 0;" />
-          <p style="color: #71717a; font-size: 13px;">Best regards,<br/><strong>EQPD Studio Team</strong><br/>eqpd.studio@gmail.com</p>
-        </div>
-      </div>
-    `,
+    html: getAdminReplyEmail({ body }),
   });
 
   if (emailError) {
-    return NextResponse.json(
-      { error: 'Failed to send email', detail: emailError },
-      { status: 500 }
-    );
+    console.error('Failed to send reply email:', emailError);
+    // Proceed to store in DB anyway so lead details aren't lost
   }
 
   // 2. Store reply in Supabase

@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { getContactConfirmationEmail } from '@/lib/email-templates';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -43,7 +44,7 @@ export async function POST(request: Request) {
 
     // --- 2. Send admin notification email ---
     const adminEmailResult = await resend.emails.send({
-      from: 'EQPD Studio <onboarding@resend.dev>',
+      from: 'EQPD Admin <onboarding@resend.dev>',
       to: ['eqpd.studio@gmail.com'],
       subject: `New Lead – EQPD Studio`,
       replyTo: email,
@@ -63,22 +64,20 @@ export async function POST(request: Request) {
 
     // --- 3. Send confirmation email to user ---
     const confirmationEmailResult = await resend.emails.send({
-      from: 'EQPD Studio <onboarding@resend.dev>',
+      from: 'EQPD Admin <onboarding@resend.dev>',
       to: [email],
       subject: 'Thanks for contacting EQPD Studio',
-      html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #7c3aed;">Hello ${name},</h2>
-          <p>Thank you for reaching out to <strong>EQPD Studio</strong>.</p>
-          <p>We have received your message and our team will review it shortly.</p>
-          <p>You can expect a response within <strong>24 hours</strong>.</p>
-          <br />
-          <p>Best regards,<br /><strong>EQPD Studio Team</strong></p>
-        </div>
-      `,
+      html: getContactConfirmationEmail({ name, service }),
     });
 
     // --- 4. Return response (warn if email failed, but lead is saved) ---
+    if (adminEmailResult.error) {
+      console.error('Failed to send admin notification:', adminEmailResult.error);
+    }
+    if (confirmationEmailResult.error) {
+      console.error('Failed to send user confirmation:', confirmationEmailResult.error);
+    }
+
     const emailWarning =
       adminEmailResult.error || confirmationEmailResult.error
         ? 'Lead saved but one or more emails failed to send.'
