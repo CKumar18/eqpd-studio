@@ -17,14 +17,14 @@ import {
 import Link from "next/link";
 
 const bankDetails = {
-  accountName: "EQPD Studio",
+  accountName: "Bandi Sai Kumar",
   bankName: "State Bank of India",
-  accountNumber: "XXXX XXXX XXXX 1234",
-  ifsc: "SBIN0001234",
-  branch: "Chennai Main Branch",
+  accountNumber: "43514056869",
+  ifsc: "SBIN0020459",
+  branch: "macha bollarum",
 };
 
-const upiId = "eqpd.studio@upi";
+const upiId = "saikumarmhop2404-1@oksbi";
 
 const plans = [
   { name: "One-Page Website", price: "₹20,000" },
@@ -222,7 +222,7 @@ function OrderPageInner() {
                     >
                       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-3 shadow-sm mb-4">
                         <img
-                          src="/images/upi-qr.png"
+                          src="/images/scanner.jpg"
                           alt="UPI QR Code"
                           className="w-40 h-40 object-contain dark:brightness-95"
                         />
