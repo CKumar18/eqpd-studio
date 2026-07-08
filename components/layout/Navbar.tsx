@@ -14,6 +14,7 @@ const navLinks = [
   { href: "/projects", label: "Projects" },
   { href: "/process", label: "Process" },
   { href: "/pricing", label: "Pricing" },
+  { href: "/book", label: "Book Call" },
 ];
 
 export default function Navbar() {

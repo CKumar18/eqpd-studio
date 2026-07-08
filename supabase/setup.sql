@@ -37,3 +37,29 @@ CREATE POLICY "Allow anon status update" ON contact_messages
 -- 6. Allow anon to read contact_messages (for admin dashboard)
 CREATE POLICY "Allow anon to read messages" ON contact_messages
   FOR SELECT TO anon USING (true);
+
+-- 7. Create bookings table for slot scheduling
+CREATE TABLE IF NOT EXISTS bookings (
+  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name          TEXT NOT NULL,
+  email         TEXT NOT NULL,
+  company       TEXT,
+  project_type  TEXT,
+  booking_date  DATE NOT NULL,
+  booking_time  TEXT NOT NULL,
+  message       TEXT,
+  created_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE (booking_date, booking_time)
+);
+
+-- Enable RLS for bookings
+ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
+
+-- Allow anyone to insert a booking
+CREATE POLICY "Allow anonymous bookings insert" ON bookings
+  FOR INSERT TO anon WITH CHECK (true);
+
+-- Allow anyone to read bookings (to disable booked slots)
+CREATE POLICY "Allow anonymous bookings query" ON bookings
+  FOR SELECT TO anon USING (true);
+

@@ -21,7 +21,7 @@ const bankDetails = {
   bankName: "State Bank of India",
   accountNumber: "43514056869",
   ifsc: "SBIN0020459",
-  branch: "macha bollarum",
+  branch: "Macha Bollarum",
 };
 
 const upiId = "saikumarmhop2404-1@oksbi";
