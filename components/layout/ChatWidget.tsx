@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   MessageSquare,
@@ -64,6 +65,7 @@ const chatbotKnowledge = [
 ];
 
 export default function ChatWidget() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -132,6 +134,95 @@ export default function ChatWidget() {
 
       // Keyword matching
       const cleanedText = text.toLowerCase();
+
+      // Dynamic action redirects
+      if (
+        cleanedText.includes("booking") || 
+        cleanedText.includes("book a call") || 
+        cleanedText.includes("book slot") || 
+        cleanedText.includes("slot booking") || 
+        cleanedText.includes("open slot") || 
+        cleanedText.includes("checkout")
+      ) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: "bot",
+            text: "Sure! Redirecting you to our **Checkout & Slot Booking** page right now...",
+            timestamp: new Date(),
+          },
+        ]);
+        setTimeout(() => {
+          setIsOpen(false);
+          router.push("/order");
+        }, 1500);
+        return;
+      }
+
+      if (cleanedText.includes("pricing") || cleanedText.includes("package") || cleanedText.includes("plan") || cleanedText.includes("cost") || cleanedText.includes("how much")) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: "bot",
+            text: "Redirecting you to our **Pricing Plans** page to view packages...",
+            timestamp: new Date(),
+          },
+        ]);
+        setTimeout(() => {
+          setIsOpen(false);
+          router.push("/pricing");
+        }, 1500);
+        return;
+      }
+
+      if (cleanedText.includes("portfolio") || cleanedText.includes("project") || cleanedText.includes("work") || cleanedText.includes("client")) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: "bot",
+            text: "Navigating to our **Featured Projects** portfolio page...",
+            timestamp: new Date(),
+          },
+        ]);
+        setTimeout(() => {
+          setIsOpen(false);
+          router.push("/projects");
+        }, 1500);
+        return;
+      }
+
+      if (cleanedText.includes("about") || cleanedText.includes("who are you") || cleanedText.includes("agency")) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: "bot",
+            text: "Redirecting you to our **About** page to learn more about our team...",
+            timestamp: new Date(),
+          },
+        ]);
+        setTimeout(() => {
+          setIsOpen(false);
+          router.push("/about");
+        }, 1500);
+        return;
+      }
+
+      if (cleanedText.includes("contact") || cleanedText.includes("support") || cleanedText.includes("help")) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: "bot",
+            text: "Navigating to our **Contact Us** page...",
+            timestamp: new Date(),
+          },
+        ]);
+        setTimeout(() => {
+          setIsOpen(false);
+          router.push("/contact");
+        }, 1500);
+        return;
+      }
+
       let matched = chatbotKnowledge.find((k) =>
         k.keywords.some((keyword) => cleanedText.includes(keyword))
       );
@@ -143,7 +234,7 @@ export default function ChatWidget() {
         botResponseText = matched.answer;
         if (matched.chips) botChips = matched.chips;
       } else {
-        botResponseText = "I'm sorry, I didn't quite catch that. You can ask me about our **Pricing plans**, **timelines**, **services**, or leave a direct message for the team.";
+        botResponseText = "I'm sorry, I didn't quite catch that. You can ask me to **open slot booking**, **show pricing**, **view portfolio**, or leave a message directly.";
       }
 
       setMessages((prev) => [
