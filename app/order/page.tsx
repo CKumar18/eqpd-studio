@@ -104,6 +104,8 @@ function OrderPageInner() {
   const [availability, setAvailability] = useState<"idle" | "checking" | "available" | "unavailable">("idle");
   const [freeSlots, setFreeSlots] = useState<string[]>([]);
   const [checkingError, setCheckingError] = useState("");
+  const [isHumanVerified, setIsHumanVerified] = useState(false);
+  const [verifyingHuman, setVerifyingHuman] = useState(false);
 
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -179,6 +181,11 @@ function OrderPageInner() {
 
     if (bookingDate && bookingTime && availability !== "available") {
       alert("Please verify slot availability by clicking 'Check Availability' before submitting your order.");
+      return;
+    }
+
+    if (availability === "available" && !isHumanVerified) {
+      alert("Please complete the security verification first to unlock payment details.");
       return;
     }
 
@@ -570,96 +577,132 @@ function OrderPageInner() {
           <div className="lg:col-span-2 flex flex-col gap-6">
             {/* Payment Method Selector */}
             {availability === "available" ? (
-              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm">
-                <div className="flex border-b border-zinc-100 dark:border-zinc-800">
-                  <button
-                    type="button"
-                    onClick={() => setActivePayment("upi")}
-                    className={`flex-1 flex items-center justify-center gap-2 py-4 text-xs font-semibold uppercase tracking-wider transition-colors ${
-                      activePayment === "upi"
-                        ? "text-violet-600 dark:text-violet-400 border-b-2 border-violet-500"
-                        : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
-                    }`}
-                  >
-                    <Smartphone size={14} />
-                    UPI / QR Code
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActivePayment("bank")}
-                    className={`flex-1 flex items-center justify-center gap-2 py-4 text-xs font-semibold uppercase tracking-wider transition-colors ${
-                      activePayment === "bank"
-                        ? "text-violet-600 dark:text-violet-400 border-b-2 border-violet-500"
-                        : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
-                    }`}
-                  >
-                    <Building2 size={14} />
-                    Bank Transfer
-                  </button>
-                </div>
+              isHumanVerified ? (
+                <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm">
+                  <div className="flex border-b border-zinc-100 dark:border-zinc-800">
+                    <button
+                      type="button"
+                      onClick={() => setActivePayment("upi")}
+                      className={`flex-1 flex items-center justify-center gap-2 py-4 text-xs font-semibold uppercase tracking-wider transition-colors ${
+                        activePayment === "upi"
+                          ? "text-violet-600 dark:text-violet-400 border-b-2 border-violet-500"
+                          : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+                      }`}
+                    >
+                      <Smartphone size={14} />
+                      UPI / QR Code
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActivePayment("bank")}
+                      className={`flex-1 flex items-center justify-center gap-2 py-4 text-xs font-semibold uppercase tracking-wider transition-colors ${
+                        activePayment === "bank"
+                          ? "text-violet-600 dark:text-violet-400 border-b-2 border-violet-500"
+                          : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+                      }`}
+                    >
+                      <Building2 size={14} />
+                      Bank Transfer
+                    </button>
+                  </div>
 
-                <div className="p-5 sm:p-6">
-                  <AnimatePresence mode="wait">
-                    {activePayment === "upi" ? (
-                      <motion.div
-                        key="upi"
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8 }}
-                        transition={{ duration: 0.2 }}
-                        className="flex flex-col items-center"
-                      >
-                        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-3 shadow-sm mb-4">
-                          <img
-                            src="/images/scanner.jpg"
-                            alt="UPI QR Code"
-                            className="w-40 h-40 object-contain dark:brightness-95"
-                          />
-                        </div>
-                        <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-semibold uppercase tracking-wider mb-4">
-                          Scan with any UPI application
-                        </p>
-
-                        <div className="w-full flex items-center justify-between gap-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-150 dark:border-zinc-800 rounded-xl px-4 py-3">
-                          <div className="min-w-0">
-                            <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">UPI ID</p>
-                            <p className="font-mono text-xs text-zinc-800 dark:text-zinc-200 font-bold truncate">{upiId}</p>
+                  <div className="p-5 sm:p-6">
+                    <AnimatePresence mode="wait">
+                      {activePayment === "upi" ? (
+                        <motion.div
+                          key="upi"
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -8 }}
+                          transition={{ duration: 0.2 }}
+                          className="flex flex-col items-center"
+                        >
+                          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-3 shadow-sm mb-4">
+                            <img
+                              src="/images/scanner.jpg"
+                              alt="UPI QR Code"
+                              className="w-40 h-40 object-contain dark:brightness-95"
+                            />
                           </div>
-                          <CopyButton text={upiId} />
-                        </div>
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        key="bank"
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8 }}
-                        transition={{ duration: 0.2 }}
-                        className="flex flex-col gap-3"
-                      >
-                        {[
-                          { label: "Account Name", value: bankDetails.accountName },
-                          { label: "Bank Name", value: bankDetails.bankName },
-                          { label: "Account Number", value: bankDetails.accountNumber },
-                          { label: "IFSC Code", value: bankDetails.ifsc },
-                          { label: "Branch", value: bankDetails.branch },
-                        ].map((item) => (
-                          <div
-                            key={item.label}
-                            className="flex items-center justify-between gap-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-150 dark:border-zinc-800 rounded-xl px-4 py-2.5"
-                          >
+                          <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-semibold uppercase tracking-wider mb-4">
+                            Scan with any UPI application
+                          </p>
+
+                          <div className="w-full flex items-center justify-between gap-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-150 dark:border-zinc-800 rounded-xl px-4 py-3">
                             <div className="min-w-0">
-                              <p className="text-[9px] text-zinc-400 font-bold uppercase tracking-wider">{item.label}</p>
-                              <p className="font-mono text-xs text-zinc-800 dark:text-zinc-200 font-bold truncate">{item.value}</p>
+                              <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">UPI ID</p>
+                              <p className="font-mono text-xs text-zinc-800 dark:text-zinc-200 font-bold truncate">{upiId}</p>
                             </div>
-                            <CopyButton text={item.value} />
+                            <CopyButton text={upiId} />
                           </div>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="bank"
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -8 }}
+                          transition={{ duration: 0.2 }}
+                          className="flex flex-col gap-3"
+                        >
+                          {[
+                            { label: "Account Name", value: bankDetails.accountName },
+                            { label: "Bank Name", value: bankDetails.bankName },
+                            { label: "Account Number", value: bankDetails.accountNumber },
+                            { label: "IFSC Code", value: bankDetails.ifsc },
+                            { label: "Branch", value: bankDetails.branch },
+                          ].map((item) => (
+                            <div
+                              key={item.label}
+                              className="flex items-center justify-between gap-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-150 dark:border-zinc-800 rounded-xl px-4 py-2.5"
+                            >
+                              <div className="min-w-0">
+                                <p className="text-[9px] text-zinc-400 font-bold uppercase tracking-wider">{item.label}</p>
+                                <p className="font-mono text-xs text-zinc-800 dark:text-zinc-200 font-bold truncate">{item.value}</p>
+                              </div>
+                              <CopyButton text={item.value} />
+                            </div>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 text-center flex flex-col items-center justify-center min-h-[320px] shadow-sm">
+                  <div className="w-12 h-12 rounded-full bg-violet-50 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400 flex items-center justify-center mb-4">
+                    <Shield size={24} />
+                  </div>
+                  <h3 className="font-display font-semibold text-sm text-zinc-900 dark:text-zinc-50 mb-2">Security Verification</h3>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-xs leading-relaxed mb-6">
+                    To prevent automated scraping, please verify you are a human to reveal the UPI and Bank details.
+                  </p>
+
+                  <button
+                    type="button"
+                    disabled={verifyingHuman}
+                    onClick={async () => {
+                      setVerifyingHuman(true);
+                      await new Promise((r) => setTimeout(r, 1200));
+                      setVerifyingHuman(false);
+                      setIsHumanVerified(true);
+                    }}
+                    className="w-full max-w-[240px] flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:border-violet-500/50 bg-zinc-50 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 transition duration-300 font-semibold text-xs cursor-pointer disabled:opacity-50"
+                  >
+                    {verifyingHuman ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-violet-500/20 border-t-violet-500 rounded-full animate-spin" />
+                        <span>Verifying...</span>
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-4 h-4 rounded border border-zinc-300 dark:border-zinc-700 flex items-center justify-center bg-white dark:bg-zinc-950" />
+                        <span>Verify I am a human</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              )
             ) : (
               <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 text-center flex flex-col items-center justify-center min-h-[320px] shadow-sm">
                 <Clock className="text-zinc-300 dark:text-zinc-700 mb-4 animate-pulse" size={48} />
