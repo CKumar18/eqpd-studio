@@ -310,230 +310,260 @@ function OrderPageInner() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
-          {/* LEFT COLUMN — Order Form */}
+          {/* LEFT COLUMN — Form & Booking */}
           <div className="lg:col-span-3 flex flex-col gap-6">
-            <form
-              onSubmit={handleSubmit}
-              className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 sm:p-8 shadow-sm"
-            >
-              <h2 className="font-display font-bold text-lg text-zinc-900 dark:text-zinc-50 mb-6">
-                Project Information
-              </h2>
+            {/* Kickoff Call Booking */}
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 sm:p-8 shadow-sm">
+              <h3 className="font-display font-semibold text-sm text-zinc-900 dark:text-zinc-50 mb-3 flex items-center gap-1.5">
+                <Clock size={16} className="text-violet-500" />
+                Book Kickoff Call Slot
+              </h3>
+              <p className="text-xs text-zinc-400 dark:text-zinc-500 leading-relaxed mb-4">
+                Choose a date and time slot (Monday to Friday, 10:00 AM - 6:00 PM IST) for your initial kickoff consultation call.
+              </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Full Name */}
-                <div className="sm:col-span-1">
-                  <label className="block text-[10px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Full Name *</label>
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Date *</label>
                   <input
-                    name="fullName"
-                    required
-                    value={form.fullName}
-                    onChange={handleChange}
-                    placeholder="Your name"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition"
+                    type="date"
+                    value={bookingDate}
+                    onChange={handleDateChange}
+                    min={tomorrowString}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition"
                   />
                 </div>
-
-                {/* Email */}
-                <div className="sm:col-span-1">
-                  <label className="block text-[10px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Email Address *</label>
-                  <input
-                    name="email"
-                    type="email"
-                    required
-                    value={form.email}
-                    onChange={handleChange}
-                    placeholder="name@company.com"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition"
-                  />
-                </div>
-
-                {/* Phone */}
-                <div className="sm:col-span-1">
-                  <label className="block text-[10px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Phone Number *</label>
-                  <input
-                    name="phone"
-                    type="tel"
-                    required
-                    value={form.phone}
-                    onChange={handleChange}
-                    placeholder="Mobile number"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition"
-                  />
-                </div>
-
-                {/* Business Name */}
-                <div className="sm:col-span-1">
-                  <label className="block text-[10px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Business / Brand Name</label>
-                  <input
-                    name="businessName"
-                    value={form.businessName}
-                    onChange={handleChange}
-                    placeholder="Company name"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition"
-                  />
-                </div>
-
-                {/* Plan Selection */}
-                <div className="sm:col-span-1">
-                  <label className="block text-[10px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Selected Plan *</label>
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Time Slot (IST) *</label>
                   <select
-                    name="selectedPlan"
-                    required
-                    value={form.selectedPlan}
-                    onChange={handleChange}
+                    value={bookingTime}
+                    onChange={handleTimeChange}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition appearance-none"
                   >
-                    <option value="">Select your plan</option>
-                    {plans.map((p) => (
-                      <option key={p.name} value={p.name}>
-                        {p.name} — {p.price}
+                    <option value="">Select a time slot</option>
+                    {timeSlots.map((time) => (
+                      <option key={time} value={time}>
+                        {time}
                       </option>
                     ))}
                   </select>
                 </div>
+              </div>
 
-                {/* Existing Web */}
-                <div className="sm:col-span-1">
-                  <label className="block text-[10px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Current Website (if any)</label>
-                  <input
-                    name="website"
-                    value={form.website}
-                    onChange={handleChange}
-                    placeholder="https://yoursite.com"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition"
-                  />
-                </div>
+              <div className="mt-4 flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={checkAvailability}
+                  disabled={!bookingDate || !bookingTime || availability === "checking"}
+                  className="inline-flex items-center justify-center py-2.5 px-4 rounded-xl border border-violet-500/30 text-violet-600 dark:text-violet-400 bg-violet-500/5 hover:bg-violet-500/10 text-xs font-semibold cursor-pointer disabled:opacity-50 transition"
+                >
+                  {availability === "checking" ? "Checking availability..." : "Check Availability"}
+                </button>
 
-                {/* Transaction ID */}
-                <div className="sm:col-span-2">
-                  <label className="block text-[10px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Transaction UTR or Reference ID *</label>
-                  <input
-                    name="transactionId"
-                    required
-                    value={form.transactionId}
-                    onChange={handleChange}
-                    placeholder="Reference number from your transfer"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition font-mono"
-                  />
-                </div>
+                {checkingError && (
+                  <div className="flex items-center gap-1.5 text-red-500 text-xs mt-1.5">
+                    <AlertCircle size={14} className="flex-shrink-0" />
+                    <span>{checkingError}</span>
+                  </div>
+                )}
 
-                {/* Message */}
-                <div className="sm:col-span-2">
-                  <label className="block text-[10px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Project Scope Brief</label>
-                  <textarea
-                    name="message"
-                    rows={4}
-                    value={form.message}
-                    onChange={handleChange}
-                    placeholder="Include details about design style, content layout, features required, or target launch date..."
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition resize-none"
-                  />
-                </div>
-
-                {/* Kickoff Call Booking */}
-                <div className="sm:col-span-2 border-t border-zinc-150 dark:border-zinc-800/80 pt-6 mt-2">
-                  <h3 className="font-display font-semibold text-sm text-zinc-900 dark:text-zinc-50 mb-3 flex items-center gap-1.5">
-                    <Clock size={16} className="text-violet-500" />
-                    Book Kickoff Call Slot
-                  </h3>
-                  <p className="text-xs text-zinc-400 dark:text-zinc-500 leading-relaxed mb-4">
-                    Choose a date and time slot (Monday to Friday, 10:00 AM - 6:00 PM IST) for your initial kickoff consultation call.
+                {availability === "available" && (
+                  <p className="text-xs text-green-500 font-semibold mt-1 flex items-center gap-1.5">
+                    ✓ a developer is available! This slot will be reserved for your kickoff.
                   </p>
+                )}
+
+                {availability === "unavailable" && (
+                  <div className="mt-1 flex flex-col gap-2 p-3 bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 rounded-xl">
+                    <p className="text-xs text-red-500 font-semibold flex items-center gap-1.5">
+                      ❌ all developers are busy at {bookingTime}.
+                    </p>
+                    {freeSlots.length > 0 ? (
+                      <div>
+                        <p className="text-[10px] uppercase font-bold text-zinc-400 mb-1">Available slots on this day:</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {freeSlots.map((slot) => (
+                            <button
+                              key={slot}
+                              type="button"
+                              onClick={() => {
+                                setBookingTime(slot);
+                                setAvailability("idle");
+                              }}
+                              className="py-1 px-2.5 bg-zinc-100 hover:bg-violet-500 hover:text-white dark:bg-zinc-800 text-[10px] font-semibold rounded-lg transition-colors border border-zinc-200 dark:border-zinc-700"
+                            >
+                              {slot}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-[10px] text-zinc-500">All slots for this day are fully booked. Please select another date.</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Project Information Form */}
+            <AnimatePresence mode="wait">
+              {availability === "available" ? (
+                <motion.form
+                  key="project-form"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -12 }}
+                  transition={{ duration: 0.3 }}
+                  onSubmit={handleSubmit}
+                  className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 sm:p-8 shadow-sm flex flex-col gap-6"
+                >
+                  <div>
+                    <h2 className="font-display font-bold text-lg text-zinc-900 dark:text-zinc-50 mb-1">
+                      Project Information
+                    </h2>
+                    <p className="text-xs text-zinc-400 dark:text-zinc-500 leading-normal">
+                      Fill out your details and verify payment reference to confirm order.
+                    </p>
+                  </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[10px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Date *</label>
+                    {/* Full Name */}
+                    <div className="sm:col-span-1">
+                      <label className="block text-[10px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Full Name *</label>
                       <input
-                        type="date"
-                        value={bookingDate}
-                        onChange={handleDateChange}
-                        min={tomorrowString}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition"
+                        name="fullName"
+                        required
+                        value={form.fullName}
+                        onChange={handleChange}
+                        placeholder="Your name"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition"
                       />
                     </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Time Slot (IST) *</label>
+
+                    {/* Email */}
+                    <div className="sm:col-span-1">
+                      <label className="block text-[10px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Email Address *</label>
+                      <input
+                        name="email"
+                        type="email"
+                        required
+                        value={form.email}
+                        onChange={handleChange}
+                        placeholder="name@company.com"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition"
+                      />
+                    </div>
+
+                    {/* Phone */}
+                    <div className="sm:col-span-1">
+                      <label className="block text-[10px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Phone Number *</label>
+                      <input
+                        name="phone"
+                        type="tel"
+                        required
+                        value={form.phone}
+                        onChange={handleChange}
+                        placeholder="Mobile number"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition"
+                      />
+                    </div>
+
+                    {/* Business Name */}
+                    <div className="sm:col-span-1">
+                      <label className="block text-[10px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Business / Brand Name</label>
+                      <input
+                        name="businessName"
+                        value={form.businessName}
+                        onChange={handleChange}
+                        placeholder="Company name"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition"
+                      />
+                    </div>
+
+                    {/* Plan Selection */}
+                    <div className="sm:col-span-1">
+                      <label className="block text-[10px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Selected Plan *</label>
                       <select
-                        value={bookingTime}
-                        onChange={handleTimeChange}
+                        name="selectedPlan"
+                        required
+                        value={form.selectedPlan}
+                        onChange={handleChange}
                         className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition appearance-none"
                       >
-                        <option value="">Select a time slot</option>
-                        {timeSlots.map((time) => (
-                          <option key={time} value={time}>
-                            {time}
+                        <option value="">Select your plan</option>
+                        {plans.map((p) => (
+                          <option key={p.name} value={p.name}>
+                            {p.name} — {p.price}
                           </option>
                         ))}
                       </select>
                     </div>
+
+                    {/* Existing Web */}
+                    <div className="sm:col-span-1">
+                      <label className="block text-[10px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Current Website (if any)</label>
+                      <input
+                        name="website"
+                        value={form.website}
+                        onChange={handleChange}
+                        placeholder="https://yoursite.com"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition"
+                      />
+                    </div>
+
+                    {/* Transaction ID */}
+                    <div className="sm:col-span-2">
+                      <label className="block text-[10px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Transaction UTR or Reference ID *</label>
+                      <input
+                        name="transactionId"
+                        required
+                        value={form.transactionId}
+                        onChange={handleChange}
+                        placeholder="Reference number from your transfer"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition font-mono"
+                      />
+                    </div>
+
+                    {/* Message */}
+                    <div className="sm:col-span-2">
+                      <label className="block text-[10px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Project Scope Brief</label>
+                      <textarea
+                        name="message"
+                        rows={4}
+                        value={form.message}
+                        onChange={handleChange}
+                        placeholder="Include details about design style, content layout, features required, or target launch date..."
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition resize-none"
+                      />
+                    </div>
                   </div>
 
-                  <div className="mt-4 flex flex-col gap-2">
-                    <button
-                      type="button"
-                      onClick={checkAvailability}
-                      disabled={!bookingDate || !bookingTime || availability === "checking"}
-                      className="inline-flex items-center justify-center py-2.5 px-4 rounded-xl border border-violet-500/30 text-violet-600 dark:text-violet-400 bg-violet-500/5 hover:bg-violet-500/10 text-xs font-semibold cursor-pointer disabled:opacity-50 transition"
-                    >
-                      {availability === "checking" ? "Checking availability..." : "Check Availability"}
-                    </button>
-
-                    {checkingError && (
-                      <div className="flex items-center gap-1.5 text-red-500 text-xs mt-1.5">
-                        <AlertCircle size={14} className="flex-shrink-0" />
-                        <span>{checkingError}</span>
-                      </div>
-                    )}
-
-                    {availability === "available" && (
-                      <p className="text-xs text-green-500 font-semibold mt-1 flex items-center gap-1.5">
-                        ✓ a developer is available! This slot will be reserved for your kickoff.
-                      </p>
-                    )}
-
-                    {availability === "unavailable" && (
-                      <div className="mt-1 flex flex-col gap-2 p-3 bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 rounded-xl">
-                        <p className="text-xs text-red-500 font-semibold flex items-center gap-1.5">
-                          ❌ all developers are busy at {bookingTime}.
-                        </p>
-                        {freeSlots.length > 0 ? (
-                          <div>
-                            <p className="text-[10px] uppercase font-bold text-zinc-400 mb-1">Available slots on this day:</p>
-                            <div className="flex flex-wrap gap-1.5">
-                              {freeSlots.map((slot) => (
-                                <button
-                                  key={slot}
-                                  type="button"
-                                  onClick={() => {
-                                    setBookingTime(slot);
-                                    setAvailability("idle");
-                                  }}
-                                  className="py-1 px-2.5 bg-zinc-100 hover:bg-violet-500 hover:text-white dark:bg-zinc-800 text-[10px] font-semibold rounded-lg transition-colors border border-zinc-200 dark:border-zinc-700"
-                                >
-                                  {slot}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        ) : (
-                          <p className="text-[10px] text-zinc-500">All slots for this day are fully booked. Please select another date.</p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Submit */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="mt-6 w-full flex items-center justify-center gap-2 py-3.5 px-6 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-violet-600 dark:hover:bg-violet-600 hover:text-white dark:hover:text-white font-semibold text-sm rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition duration-300 cursor-pointer"
-              >
-                {loading ? "Submitting details..." : "Confirm Order"}
-              </button>
-            </form>
+                  {/* Submit */}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="mt-2 w-full flex items-center justify-center gap-2 py-3.5 px-6 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-violet-600 dark:hover:bg-violet-600 hover:text-white dark:hover:text-white font-semibold text-sm rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition duration-300 cursor-pointer"
+                  >
+                    {loading ? "Submitting details..." : "Confirm Order"}
+                  </button>
+                </motion.form>
+              ) : (
+                <motion.div
+                  key="form-locked"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -12 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 sm:p-8 text-center flex flex-col items-center justify-center min-h-[260px] shadow-sm"
+                >
+                  <Shield className="text-zinc-300 dark:text-zinc-700 mb-4 animate-pulse" size={40} />
+                  <h3 className="font-display font-semibold text-sm text-zinc-900 dark:text-zinc-50 mb-2">Project Information Locked</h3>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-xs leading-relaxed">
+                    Please choose a preferred kickoff call date and time slot above, then click <strong>Check Availability</strong> to unlock the project details form.
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* RIGHT COLUMN — Payment Details */}
@@ -686,7 +716,7 @@ function OrderPageInner() {
                         transition={{ duration: 0.2 }}
                         className="overflow-hidden"
                       >
-                        <div className="px-6 pb-4 text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed border-t border-zinc-50 dark:border-zinc-850 pt-2.5">
+                        <div className="px-6 pb-4 text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed border-t border-zinc-100 dark:border-zinc-800/60 pt-2.5">
                           {faq.a}
                         </div>
                       </motion.div>
