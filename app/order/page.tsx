@@ -13,6 +13,7 @@ import {
   ArrowLeft,
   Shield,
   Clock,
+  AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -25,6 +26,17 @@ const bankDetails = {
 };
 
 const upiId = "saikumarmhop2404-1@oksbi";
+
+const timeSlots = [
+  "10:00 AM",
+  "11:00 AM",
+  "12:00 PM",
+  "01:00 PM",
+  "02:00 PM",
+  "03:00 PM",
+  "04:00 PM",
+  "05:00 PM",
+];
 
 const plans = [
   { name: "One-Page Website", price: "₹20,000" },
@@ -87,12 +99,123 @@ function OrderPageInner() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const [bookingDate, setBookingDate] = useState("");
+  const [bookingTime, setBookingTime] = useState("");
+  const [availability, setAvailability] = useState<"idle" | "checking" | "available" | "unavailable">("idle");
+  const [freeSlots, setFreeSlots] = useState<string[]>([]);
+  const [checkingError, setCheckingError] = useState("");
+
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowString = tomorrow.toISOString().split("T")[0];
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setBookingDate(e.target.value);
+    setAvailability("idle");
+    setCheckingError("");
+  };
+
+  const handleTimeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setBookingTime(e.target.value);
+    setAvailability("idle");
+    setCheckingError("");
+  };
+
+  const checkAvailability = async () => {
+    if (!bookingDate || !bookingTime) {
+      setCheckingError("Please select both date and time slot.");
+      return;
+    }
+
+    const dateObj = new Date(bookingDate);
+    const day = dateObj.getUTCDay();
+
+    // Enforce Monday (1) to Friday (5)
+    if (day === 0 || day === 6) {
+      setCheckingError("Kickoff calls are only available from Monday to Friday.");
+      setAvailability("idle");
+      return;
+    }
+
+    // Enforce future date
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (dateObj < today) {
+      setCheckingError("Cannot book a slot in the past.");
+      setAvailability("idle");
+      return;
+    }
+
+    setCheckingError("");
+    setAvailability("checking");
+
+    try {
+      const res = await fetch(`/api/bookings?date=${bookingDate}`);
+      if (res.ok) {
+        const booked = await res.json() as string[];
+        
+        // Filter free slots from standard timeSlots
+        const available = timeSlots.filter((t) => !booked.includes(t));
+        setFreeSlots(available);
+
+        if (booked.includes(bookingTime)) {
+          setAvailability("unavailable");
+        } else {
+          setAvailability("available");
+        }
+      } else {
+        setCheckingError("Failed to verify slot availability.");
+        setAvailability("idle");
+      }
+    } catch (err) {
+      console.error(err);
+      setCheckingError("Failed to connect to the database. Please try again.");
+      setAvailability("idle");
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (bookingDate && bookingTime && availability !== "available") {
+      alert("Please verify slot availability by clicking 'Check Availability' before submitting your order.");
+      return;
+    }
+
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setLoading(false);
-    setSubmitted(true);
+
+    try {
+      if (bookingDate && bookingTime) {
+        const res = await fetch("/api/bookings", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: form.fullName,
+            email: form.email,
+            company: form.businessName,
+            projectType: form.selectedPlan,
+            date: bookingDate,
+            time: bookingTime,
+            message: `Order kickoff call notes: ${form.message}`,
+          }),
+        });
+
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || "Failed to book kickoff call slot");
+        }
+      }
+
+      await new Promise((r) => setTimeout(r, 1200));
+      setSubmitted(true);
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || "An error occurred. Please verify details and try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const faqs = [
@@ -134,7 +257,16 @@ function OrderPageInner() {
             Order Submitted
           </h2>
           <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed mb-6">
-            Thank you, {form.fullName}. We have received your project scope and payment details. We will email you at <strong>{form.email}</strong> within 24 hours to schedule the kickoff meeting.
+            Thank you, {form.fullName}. We have received your project scope and payment details. We will email you at <strong>{form.email}</strong> within 24 hours.
+            {bookingDate && bookingTime && (
+              <span className="block mt-4 p-3.5 bg-violet-500/10 border border-violet-500/20 text-violet-600 dark:text-violet-400 rounded-xl text-xs text-left leading-normal font-semibold">
+                🗓️ Kickoff Call Confirmed:<br/>
+                <span className="text-zinc-800 dark:text-zinc-200 mt-1 block">
+                  {bookingDate} at {bookingTime} IST.
+                </span>
+                <span className="text-[10px] text-zinc-400 font-normal block mt-1">A calendar invite has been sent.</span>
+              </span>
+            )}
           </p>
           <Link
             href="/"
@@ -410,6 +542,99 @@ function OrderPageInner() {
                     placeholder="Include details about design style, content layout, features required, or target launch date..."
                     className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition resize-none"
                   />
+                </div>
+
+                {/* Kickoff Call Booking */}
+                <div className="sm:col-span-2 border-t border-zinc-150 dark:border-zinc-800/80 pt-6 mt-2">
+                  <h3 className="font-display font-semibold text-sm text-zinc-900 dark:text-zinc-50 mb-3 flex items-center gap-1.5">
+                    <Clock size={16} className="text-violet-500" />
+                    Book Kickoff Call Slot
+                  </h3>
+                  <p className="text-xs text-zinc-400 dark:text-zinc-500 leading-relaxed mb-4">
+                    Choose a date and time slot (Monday to Friday, 10:00 AM - 6:00 PM IST) for your initial kickoff consultation call.
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Date *</label>
+                      <input
+                        type="date"
+                        value={bookingDate}
+                        onChange={handleDateChange}
+                        min={tomorrowString}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-zinc-400 dark:text-zinc-500 mb-1.5 uppercase tracking-wider">Time Slot (IST) *</label>
+                      <select
+                        value={bookingTime}
+                        onChange={handleTimeChange}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition appearance-none"
+                      >
+                        <option value="">Select a time slot</option>
+                        {timeSlots.map((time) => (
+                          <option key={time} value={time}>
+                            {time}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex flex-col gap-2">
+                    <button
+                      type="button"
+                      onClick={checkAvailability}
+                      disabled={!bookingDate || !bookingTime || availability === "checking"}
+                      className="inline-flex items-center justify-center py-2.5 px-4 rounded-xl border border-violet-500/30 text-violet-600 dark:text-violet-400 bg-violet-500/5 hover:bg-violet-500/10 text-xs font-semibold cursor-pointer disabled:opacity-50 transition"
+                    >
+                      {availability === "checking" ? "Checking availability..." : "Check Availability"}
+                    </button>
+
+                    {checkingError && (
+                      <div className="flex items-center gap-1.5 text-red-500 text-xs mt-1.5">
+                        <AlertCircle size={14} className="flex-shrink-0" />
+                        <span>{checkingError}</span>
+                      </div>
+                    )}
+
+                    {availability === "available" && (
+                      <p className="text-xs text-green-500 font-semibold mt-1 flex items-center gap-1.5">
+                        ✓ Sai Kumar is available! This slot will be reserved for your kickoff.
+                      </p>
+                    )}
+
+                    {availability === "unavailable" && (
+                      <div className="mt-1 flex flex-col gap-2 p-3 bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 rounded-xl">
+                        <p className="text-xs text-red-500 font-semibold flex items-center gap-1.5">
+                          ❌ Sai Kumar is busy at {bookingTime}.
+                        </p>
+                        {freeSlots.length > 0 ? (
+                          <div>
+                            <p className="text-[10px] uppercase font-bold text-zinc-400 mb-1">Available slots on this day:</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {freeSlots.map((slot) => (
+                                <button
+                                  key={slot}
+                                  type="button"
+                                  onClick={() => {
+                                    setBookingTime(slot);
+                                    setAvailability("idle");
+                                  }}
+                                  className="py-1 px-2.5 bg-zinc-100 hover:bg-violet-500 hover:text-white dark:bg-zinc-800 text-[10px] font-semibold rounded-lg transition-colors border border-zinc-200 dark:border-zinc-700"
+                                >
+                                  {slot}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="text-[10px] text-zinc-500">All slots for this day are fully booked. Please select another date.</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
